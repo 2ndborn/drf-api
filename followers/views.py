@@ -12,7 +12,7 @@ class FollowerList(generics.ListCreateAPIView):
     Perform_create: associate the current logged in user with a follower.
     """
     serializer_class = FollowerSerializer
-    permission_classes = [permission.IsAuthenticatedOrReadOnly]
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     queryset = Follower.objects.all()
 
     def perform_create(self, serializer):
