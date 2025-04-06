@@ -48,10 +48,27 @@ class CommentDetailViewTest(APITestCase):
             owner=self.adam, post=self.post, content='test content'
         )
         self.comment2 = Comment.objects.create(
-            owner=self.adam, post=self.post, content='test content'
+            owner=self.brian, post=self.post, content='test content2'
         )
 
     def test_can_retrieve_a_comment_using_valid_id(self):
         response = self.client.get('/comments/1/')
         self.assertEqual(response.data['content'], 'test content')
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_cant_retrieve_a_comment_using_invalid_id(self):
+        response = self.client.get('/comments/999/')
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_user_can_update_own_comment(self):
+        self.client.login(username='adam', password='pass')
+        response = self.client.put('/comments/1/', {'content': 'test content'})
+        comment = Comment.objects.filter(pk=1).first()
+        self.assertEqual(comment.content, 'test content')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_user_cant_update_someone_elses_comment(self):
+        self.client.login(username='adam', password='pass')
+        response = self.client.put('/comments/2/', {'content': 'test content 2'})
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        
